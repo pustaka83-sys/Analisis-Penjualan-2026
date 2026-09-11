@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Penjualan 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard Penjualan 2026</h1>
+          <p class="text-indigo-100 text-sm mt-1" id="subtitle">Memuat data...</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="data-status" class="inline-flex items-center gap-1.5 text-xs bg-white/15 backdrop-blur rounded-full px-3 py-1">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="status-text">Loading...</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Filter Controls -->
+    <section aria-label="Filter" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Filter Data</h2>
+        <button id="btn-reset" class="ml-auto text-xs text-indigo-600 hover:text-indigo-800 font-medium transition hidden">Reset Semua</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label for="filter-region" class="block text-xs font-medium text-slate-500 mb-1">Region / Gudang</label>
+          <select id="filter-region" class="filter-select w-full text-sm rounded-lg border-slate-200 bg-slate-50">
+            <option value="">Semua Region</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-category" class="block text-xs font-medium text-slate-500 mb-1">Kategori Produk</label>
+          <select id="filter-category" class="filter-select w-full text-sm rounded-lg border-slate-200 bg-slate-50">
+            <option value="">Semua Kategori</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-customer" class="block text-xs font-medium text-slate-500 mb-1">Tipe Pelanggan</label>
+          <select id="filter-customer" class="filter-select w-full text-sm rounded-lg border-slate-200 bg-slate-50">
+            <option value="">Semua Tipe</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-channel" class="block text-xs font-medium text-slate-500 mb-1">Sales Channel</label>
+          <select id="filter-channel" class="filter-select w-full text-sm rounded-lg border-slate-200 bg-slate-50">
+            <option value="">Semua Channel</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Cards -->
+    <section aria-label="KPI" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-section">
+      <div class="kpi-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-lg bg-emerald-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Revenue</p>
+            <p class="text-xl font-bold text-slate-800 mt-0.5" id="kpi-revenue">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Transaksi</p>
+            <p class="text-xl font-bold text-slate-800 mt-0.5" id="kpi-transactions">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-lg bg-amber-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Qty Terjual</p>
+            <p class="text-xl font-bold text-slate-800 mt-0.5" id="kpi-qty">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-lg bg-rose-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Avg Discount</p>
+            <p class="text-xl font-bold text-slate-800 mt-0.5" id="kpi-discount">-</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts Grid -->
+    <section aria-label="Visualisasi" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+      <!-- Sales Trend -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 lg:col-span-2">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Sales Trend</h3>
+        <div class="chart-wrapper"><canvas id="chart-trend"></canvas></div>
+      </div>
+
+      <!-- Revenue per Region -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Revenue per Region</h3>
+        <div class="chart-wrapper"><canvas id="chart-region"></canvas></div>
+      </div>
+
+      <!-- Revenue per Category -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Revenue per Kategori Produk</h3>
+        <div class="chart-wrapper"><canvas id="chart-category"></canvas></div>
+      </div>
+
+      <!-- Sales per Platform -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Sales per Sales Channel</h3>
+        <div class="chart-wrapper"><canvas id="chart-platform"></canvas></div>
+      </div>
+
+      <!-- Customer Type Distribution -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Distribusi Tipe Pelanggan</h3>
+        <div class="chart-wrapper"><canvas id="chart-customer"></canvas></div>
+      </div>
+
+      <!-- Payment Method Usage -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Penggunaan Metode Pembayaran</h3>
+        <div class="chart-wrapper"><canvas id="chart-payment"></canvas></div>
+      </div>
+
+      <!-- Sales Channel Distribution -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Sales Channel Distribution</h3>
+        <div class="chart-wrapper"><canvas id="chart-channel"></canvas></div>
+      </div>
+
+      <!-- Discount vs Sales Scatter -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5 lg:col-span-2">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Discount vs Sales (Scatter Plot)</h3>
+        <div class="chart-wrapper"><canvas id="chart-scatter"></canvas></div>
+      </div>
+
+      <!-- Top 10 Highest Sales -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Top 10 Produk Revenue Tertinggi</h3>
+        <div class="chart-wrapper"><canvas id="chart-top10"></canvas></div>
+      </div>
+
+      <!-- Qty Sold per Category -->
+      <div class="chart-card bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">Quantity Terjual per Kategori</h3>
+        <div class="chart-wrapper"><canvas id="chart-qty-category"></canvas></div>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-400 py-4 border-t border-slate-200">
+      Dashboard Penjualan 2026 &mdash; Data dari CSV, tanpa data dummy
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
